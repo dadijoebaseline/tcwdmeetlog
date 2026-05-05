@@ -89,7 +89,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   // "A T T E N D A N C E" — centered on page
   doc.setFontSize(18);
   doc.setCharSpace(5);
-  doc.text('ATTENDANCE', pageCenter, headerTop + 12, { align: 'center' });
+  doc.text('ATTENDANCE', pageCenter, headerTop + 16, { align: 'center' });
   doc.setCharSpace(0);
 
   // Divider

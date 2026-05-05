@@ -6,6 +6,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { Button } from '@/components/Button';
 import { Card, Input } from '@/components/FormElements';
+import { SignaturePad } from '@/components/SignaturePad';
 
 function RoleSelectForm() {
   const searchParams = useSearchParams();
@@ -136,13 +137,16 @@ function RoleSelectForm() {
                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                 required
               />
-              <Input
-                label="Digital Signature"
-                placeholder="Enter your signature or initials"
-                value={formData.digitalSignature}
-                onChange={(e) => setFormData({ ...formData, digitalSignature: e.target.value })}
-                required
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Digital Signature *
+                </label>
+                <p className="text-xs text-gray-600 mb-3">Draw your signature in the box below</p>
+                <SignaturePad
+                  onSignatureChange={(sig) => setFormData({ ...formData, digitalSignature: sig })}
+                  onClear={() => setFormData({ ...formData, digitalSignature: '' })}
+                />
+              </div>
             </div>
           )}
 

@@ -30,6 +30,16 @@ export default function AttendeeMeetingDetailPage() {
       .finally(() => setLoading(false));
   }, [meetingId]);
 
+  // Auto-reload page after successful check-in/out
+  useEffect(() => {
+    if (checkInStatus === 'success') {
+      const timer = setTimeout(() => {
+        window.location.reload();
+      }, 1500); // Show success message for 1.5 seconds, then reload
+      return () => clearTimeout(timer);
+    }
+  }, [checkInStatus]);
+
   const myRecord = meeting?.attendees?.find((a) => a.uid === user?.uid);
   const alreadyCheckedIn = myRecord?.checkedIn ?? false;
 

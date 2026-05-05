@@ -1,22 +1,19 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { useEffect, useState, Suspense } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { Button } from '@/components/Button';
-import { Card, Input, Select } from '@/components/FormElements';
+import { Card, Input } from '@/components/FormElements';
 
-export default function RoleSelectPage() {
+function RoleSelectForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const uid = searchParams.get('uid');
 
   const [role, setRole] = useState<'hr' | 'attendee'>('attendee');
-  const [formData, setFormData] = useState({
-    department: '',
-    position: '',
-  });
+  const [formData, setFormData] = useState({ department: '', position: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -52,10 +49,8 @@ export default function RoleSelectPage() {
         userData.position = formData.position;
       }
 
-      const userDocRef = doc(db, 'users', user.uid);
-      await setDoc(userDocRef, userData);
+      await setDoc(doc(db, 'users', user.uid), userData);
 
-      // Redirect based on role
       if (role === 'hr') {
         router.push('/dashboard');
       } else {
@@ -72,7 +67,7 @@ export default function RoleSelectPage() {
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Select Your Role</h1>
-          <p className="text-gray-600">Choose how you'll use this system</p>
+          <p className="text-gray-600">Choose how you&apos;ll use this system</p>
         </div>
 
         {error && (
@@ -83,14 +78,16 @@ export default function RoleSelectPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
-              style={{ borderColor: role === 'hr' ? '#2563eb' : '#e5e7eb' }}>
+            <label
+              className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
+              style={{ borderColor: role === 'hr' ? '#2563eb' : '#e5e7eb' }}
+            >
               <input
                 type="radio"
                 name="role"
                 value="hr"
                 checked={role === 'hr'}
-                onChange={(e) => setRole(e.target.value as 'hr')}
+                onChange={() => setRole('hr')}
                 className="w-4 h-4 cursor-pointer"
               />
               <div className="ml-4">
@@ -99,14 +96,16 @@ export default function RoleSelectPage() {
               </div>
             </label>
 
-            <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
-              style={{ borderColor: role === 'attendee' ? '#2563eb' : '#e5e7eb' }}>
+            <label
+              className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
+              style={{ borderColor: role === 'attendee' ? '#2563eb' : '#e5e7eb' }}
+            >
               <input
                 type="radio"
                 name="role"
                 value="attendee"
                 checked={role === 'attendee'}
-                onChange={(e) => setRole(e.target.value as 'attendee')}
+                onChange={() => setRole('attendee')}
                 className="w-4 h-4 cursor-pointer"
               />
               <div className="ml-4">
@@ -141,5 +140,13 @@ export default function RoleSelectPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function RoleSelectPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <RoleSelectForm />
+    </Suspense>
   );
 }

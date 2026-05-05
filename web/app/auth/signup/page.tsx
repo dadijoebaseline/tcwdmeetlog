@@ -1,22 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/Button';
-import { Card, Input } from '@/components/FormElements';
+import { Card } from '@/components/FormElements';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignUp = async () => {
     try {
       setError('');
       setLoading(true);
@@ -24,15 +22,12 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Check if user exists in Firestore
       const userDocRef = doc(db, 'users', result.user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // User is new, redirect to role selection
         router.push(`/auth/role-select?uid=${result.user.uid}`);
       } else {
-        // User exists, redirect based on role
         const userData = userDocSnap.data();
         if (userData.role === 'hr') {
           router.push('/dashboard');
@@ -41,7 +36,7 @@ export default function LoginPage() {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      setError(err.message || 'Failed to sign up');
       setLoading(false);
     }
   };
@@ -50,8 +45,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Login</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+          <p className="text-gray-600">Sign up with your Gmail account</p>
         </div>
 
         {error && (
@@ -62,35 +57,25 @@ export default function LoginPage() {
 
         <div className="space-y-4">
           <Button
-            onClick={handleGoogleSignIn}
+            onClick={handleGoogleSignUp}
             isLoading={loading}
             className="w-full flex items-center justify-center gap-2"
           >
             <span>🔐</span>
-            Sign in with Google
+            Sign up with Google
           </Button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
-          </div>
-
-          <p className="text-center text-gray-600 text-sm">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign up here
+          <p className="text-center text-gray-600 text-sm mt-4">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
+              Log in
             </Link>
           </p>
         </div>
 
         <div className="mt-8 p-4 bg-blue-50 rounded-lg text-sm text-gray-600">
-          <p className="font-semibold text-gray-900 mb-2">Demo Accounts:</p>
-          <p>• HR: Use Gmail to sign up and select "HR Manager" role</p>
-          <p>• Attendee: Use Gmail to sign up and select "Attendee" role</p>
+          <p className="font-semibold text-gray-900 mb-2">After sign up:</p>
+          <p>• You&apos;ll be asked to select your role (HR Manager or Attendee)</p>
         </div>
       </Card>
     </div>

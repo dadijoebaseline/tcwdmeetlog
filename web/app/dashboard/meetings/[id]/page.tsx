@@ -412,6 +412,9 @@ export default function MeetingDetailPage() {
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">
                         Check-in Time
                       </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900">
+                        Check-out Time
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -433,10 +436,17 @@ export default function MeetingDetailPage() {
                             <span className="text-gray-500">Pending</span>
                           )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 text-gray-900">
                           {attendee.checkInTime
                             ? new Date(
                                 attendee.checkInTime.toDate()
+                              ).toLocaleTimeString()
+                            : '-'}
+                        </td>
+                        <td className="py-3 px-4 text-gray-900">
+                          {attendee.checkedOut && attendee.checkOutTime
+                            ? new Date(
+                                attendee.checkOutTime.toDate()
                               ).toLocaleTimeString()
                             : '-'}
                         </td>

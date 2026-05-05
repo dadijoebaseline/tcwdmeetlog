@@ -155,27 +155,7 @@ export default function Home() {
           </div>
         </Card>
 
-        {/* Tech Stack */}
-        <Card className="text-center">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">Powered By</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            <div className="px-4 py-2 bg-blue-50 rounded-lg">
-              <span className="font-semibold text-gray-700">Firebase</span>
-            </div>
-            <div className="px-4 py-2 bg-blue-50 rounded-lg">
-              <span className="font-semibold text-gray-700">Next.js</span>
-            </div>
-            <div className="px-4 py-2 bg-blue-50 rounded-lg">
-              <span className="font-semibold text-gray-700">React</span>
-            </div>
-            <div className="px-4 py-2 bg-blue-50 rounded-lg">
-              <span className="font-semibold text-gray-700">Tailwind CSS</span>
-            </div>
-            <div className="px-4 py-2 bg-blue-50 rounded-lg">
-              <span className="font-semibold text-gray-700">Android</span>
-            </div>
-          </div>
-        </Card>
+
       </div>
     </div>
   );

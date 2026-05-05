@@ -73,7 +73,7 @@ export default function MeetingsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <h3 className="text-lg font-semibold text-gray-900 truncate">{meeting.title}</h3>
-                          <p className="text-sm text-gray-500 mt-0.5">
+                          <p className="text-sm text-gray-700 mt-0.5">
                             {meeting.date} at {meeting.time} · {meeting.venue}
                           </p>
                         </div>

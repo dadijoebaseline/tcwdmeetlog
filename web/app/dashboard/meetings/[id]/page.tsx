@@ -332,8 +332,8 @@ export default function MeetingDetailPage() {
                         key={attendee.uid}
                         className="border-b border-gray-100 hover:bg-gray-50"
                       >
-                        <td className="py-3 px-4">{attendee.name}</td>
-                        <td className="py-3 px-4">{attendee.email}</td>
+                        <td className="py-3 px-4 text-gray-900">{attendee.name}</td>
+                        <td className="py-3 px-4 text-gray-900">{attendee.email}</td>
                         <td className="py-3 px-4">
                           {attendee.checkedIn ? (
                             <span className="text-green-600 font-medium">
@@ -422,8 +422,8 @@ export default function MeetingDetailPage() {
                           attendee.checkedIn ? 'bg-green-50' : ''
                         }`}
                       >
-                        <td className="py-3 px-4 font-medium">{attendee.name}</td>
-                        <td className="py-3 px-4">{attendee.email}</td>
+                        <td className="py-3 px-4 font-medium text-gray-900">{attendee.name}</td>
+                        <td className="py-3 px-4 text-gray-900">{attendee.email}</td>
                         <td className="py-3 px-4">
                           {attendee.checkedIn ? (
                             <span className="text-green-600 font-medium">

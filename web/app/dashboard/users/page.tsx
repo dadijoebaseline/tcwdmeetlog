@@ -182,7 +182,7 @@ export default function UsersPage() {
                     filtered.map((u) => (
                       <tr key={u.uid} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 text-gray-900 font-medium">{u.name}</td>
-                        <td className="py-3 px-4 text-gray-600">{u.email}</td>
+                        <td className="py-3 px-4 text-gray-900">{u.email}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                             u.role === 'hr' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
@@ -190,7 +190,7 @@ export default function UsersPage() {
                             {u.role === 'hr' ? 'HR Manager' : 'Attendee'}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-gray-600">{u.department || '—'}</td>
+                        <td className="py-3 px-4 text-gray-900">{u.department || '—'}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                             u.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'

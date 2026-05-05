@@ -113,30 +113,30 @@ export default function AttendeeMeetingDetailPage() {
           </Link>
 
           {/* Header */}
-          <div className="mb-6">
+            <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">{meeting.title}</h1>
-            <p className="text-gray-500 mt-1">{meeting.venue}</p>
+            <p className="text-gray-700 mt-1">{meeting.venue}</p>
           </div>
 
           {/* Meeting info card */}
           <Card className="mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Date</p>
+                <p className="text-xs text-gray-600 uppercase tracking-wide">Date</p>
                 <p className="text-gray-900 font-medium mt-0.5">{meeting.date}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Time</p>
+                <p className="text-xs text-gray-600 uppercase tracking-wide">Time</p>
                 <p className="text-gray-900 font-medium mt-0.5">{meeting.time}</p>
               </div>
               <div className="col-span-2">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Venue</p>
+                <p className="text-xs text-gray-600 uppercase tracking-wide">Venue</p>
                 <p className="text-gray-900 font-medium mt-0.5">{meeting.venue}</p>
               </div>
               {meeting.description && (
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Notes</p>
-                  <p className="text-gray-700 mt-0.5 text-sm">{meeting.description}</p>
+                  <p className="text-xs text-gray-600 uppercase tracking-wide">Notes</p>
+                  <p className="text-gray-900 mt-0.5 text-sm">{meeting.description}</p>
                 </div>
               )}
             </div>
@@ -149,13 +149,13 @@ export default function AttendeeMeetingDetailPage() {
                 <>
                   <div className="text-6xl mb-4">✅</div>
                   <h2 className="text-2xl font-bold text-green-700 mb-1">You're Checked In!</h2>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-700 text-sm">
                     Checked in at{' '}
                     {myRecord?.checkInTime
                       ? new Date(myRecord.checkInTime.toMillis()).toLocaleString()
                       : '—'}
                   </p>
-                  <p className="text-gray-600 text-sm mt-4 mb-6">Ready to check out? Scan the QR code again.</p>
+                  <p className="text-gray-700 text-sm mt-4 mb-6">Ready to check out? Scan the QR code again.</p>
                   <button
                     onClick={() => { setScanMode('check-out'); setCheckInStatus('idle'); setShowScanner(true); }}
                     className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-lg transition shadow-md shadow-orange-200"
@@ -167,13 +167,13 @@ export default function AttendeeMeetingDetailPage() {
                 <>
                   <div className="text-6xl mb-4">✅</div>
                   <h2 className="text-2xl font-bold text-green-700 mb-1">You've Checked Out!</h2>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-700 text-sm">
                     Checked in at{' '}
                     {myRecord?.checkInTime
                       ? new Date(myRecord.checkInTime.toMillis()).toLocaleString()
                       : '—'}
                   </p>
-                  <p className="text-gray-500 text-sm mt-2">
+                  <p className="text-gray-700 text-sm mt-2">
                     Checked out at{' '}
                     {myRecord?.checkOutTime
                       ? new Date(myRecord.checkOutTime.toMillis()).toLocaleString()
@@ -184,7 +184,7 @@ export default function AttendeeMeetingDetailPage() {
                 <>
                   <div className="text-6xl mb-4">📷</div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Scan to Check In</h2>
-                  <p className="text-gray-500 text-sm mb-6">
+                  <p className="text-gray-700 text-sm mb-6">
                     Ask the meeting organizer to show the QR code, then tap the button below to scan it with your camera.
                   </p>
 

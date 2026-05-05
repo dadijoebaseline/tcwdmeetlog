@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "site": "tcwdmeetlog",
+    "public": "web/public",
+    "cleanUrls": true,
+    "trailingSlashBehavior": "REMOVE",
+    "headers": [
+      {
+        "source": "**/*.@(css|js|svg|png|jpg|jpeg|gif|ico)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      }
+    ]
+  }
+}
+

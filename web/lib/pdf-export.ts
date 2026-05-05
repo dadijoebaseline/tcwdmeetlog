@@ -8,7 +8,9 @@ export interface MeetingExportData {
   venue: string;
   date: string;
   time: string;
+  topics?: string[];
   description?: string;
+  resourceSpeaker?: string;
   attendees: MeetingAttendee[];
   allUsers: UserProfile[];
 }
@@ -149,18 +151,28 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   doc.text('TOPICS / AGENDA', marginL, y);
   y += 5; // gap between label and table header
 
+  // Build topics body - each topic on a separate row
+  const topicsArray = data.topics && data.topics.length > 0 
+    ? data.topics.filter(t => t.trim()).map((topic, idx) => [
+        String(idx + 1),
+        topic,
+        idx === 0 ? `${formatDate(data.date)}\n${data.time}` : '',
+        idx === 0 ? (data.resourceSpeaker || '') : '',
+      ])
+    : [
+        [
+          '1',
+          data.description || data.title,
+          `${formatDate(data.date)}\n${data.time}`,
+          data.resourceSpeaker || '',
+        ],
+      ];
+
   autoTable(doc, {
     startY: y,
     margin: { left: marginL, right: marginR },
     head: [['#', 'Topics', 'Date / Time', 'Resource Speaker']],
-    body: [
-      [
-        '1',
-        data.description || data.title,
-        `${formatDate(data.date)}\n${data.time}`,
-        data.resourceSpeaker || '',
-      ],
-    ],
+    body: topicsArray,
     headStyles: {
       fillColor: [30, 80, 160],
       textColor: 255,

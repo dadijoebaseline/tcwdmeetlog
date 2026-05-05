@@ -12,7 +12,7 @@ interface MeetingFormProps {
     date: string;
     time: string;
     venue: string;
-    description?: string;
+    topics?: string[];
     resourceSpeaker?: string;
   }) => Promise<void>;
   submitLabel?: string;
@@ -30,7 +30,7 @@ export function MeetingForm({
     date: initialData?.date || '',
     time: initialData?.time || '',
     venue: initialData?.venue || '',
-    description: initialData?.description || '',
+    topics: initialData?.topics || [''],
     resourceSpeaker: initialData?.resourceSpeaker || '',
   });
 
@@ -79,7 +79,7 @@ export function MeetingForm({
           date: '',
           time: '',
           venue: '',
-          description: '',
+          topics: [''],
           resourceSpeaker: '',
         });
       }
@@ -163,17 +163,52 @@ export function MeetingForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description (optional)
+            Topics / Agenda (optional)
           </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Add any additional details about this meeting..."
-            rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <p className="text-xs text-gray-600 mb-3">Add one or more agenda topics. Each topic will appear on a separate line in the PDF export.</p>
+          
+          <div className="space-y-3">
+            {formData.topics.map((topic, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => {
+                    const newTopics = [...formData.topics];
+                    newTopics[index] = e.target.value;
+                    setFormData((prev) => ({ ...prev, topics: newTopics }));
+                  }}
+                  placeholder={`Topic ${index + 1}...`}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                />
+                {formData.topics.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newTopics = formData.topics.filter((_, i) => i !== index);
+                      setFormData((prev) => ({ ...prev, topics: newTopics }));
+                    }}
+                    className="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 font-medium text-sm transition"
+                    disabled={isLoading}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFormData((prev) => ({ ...prev, topics: [...prev.topics, ''] }));
+            }}
+            className="mt-3 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 font-medium text-sm transition"
             disabled={isLoading}
-          />
+          >
+            + Add Topic
+          </button>
         </div>
 
         {error && (

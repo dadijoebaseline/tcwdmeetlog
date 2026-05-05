@@ -159,6 +159,7 @@ export default function MeetingDetailPage() {
         venue: meeting.venue,
         date: meeting.date,
         time: meeting.time,
+        topics: meeting.topics,
         description: meeting.description,
         resourceSpeaker: meeting.resourceSpeaker,
         attendees: meeting.attendees,

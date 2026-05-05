@@ -38,7 +38,8 @@ export default function EditMeetingPage() {
     date: string;
     time: string;
     venue: string;
-    description?: string;
+    topics?: string[];
+    resourceSpeaker?: string;
   }) => {
     if (!meeting) return;
     try {

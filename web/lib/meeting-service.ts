@@ -25,7 +25,8 @@ export interface Meeting {
   date: string; // YYYY-MM-DD format
   time: string; // HH:MM format
   venue: string;
-  description?: string;
+  topics?: string[]; // Array of topics/agenda items
+  description?: string; // Deprecated: use topics instead
   resourceSpeaker?: string; // Resource speaker name
   createdBy: string; // User UID
   createdAt: Timestamp;

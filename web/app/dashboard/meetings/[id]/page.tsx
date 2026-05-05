@@ -39,8 +39,8 @@ export default function MeetingDetailPage() {
     ReturnType<typeof getMeetingAttendanceSummary>
   > | null>(null);
   const [showAddAttendee, setShowAddAttendee] = useState(false);
-  const [selectedAttendee, setSelectedAttendee] = useState<string>('');
-  const [exporting, setExporting] = useState(false);
+  const [selectedAttendees, setSelectedAttendees] = useState<Set<string>>(new Set());
+  const [addingAttendees, setAddingAttendees] = useState(false);
 
   useEffect(() => {
     const loadMeetingData = async () => {
@@ -83,25 +83,52 @@ export default function MeetingDetailPage() {
   }
 
   const handleAddAttendee = async () => {
-    if (!selectedAttendee) return;
+    if (selectedAttendees.size === 0) return;
 
-    const userToAdd = availableUsers.find((u) => u.uid === selectedAttendee);
-    if (!userToAdd) return;
-
+    setAddingAttendees(true);
     try {
-      await addMeetingAttendee(meetingId, {
-        uid: userToAdd.uid,
-        name: userToAdd.name,
-        email: userToAdd.email,
-        checkedIn: false,
-      });
+      // Add all selected attendees
+      for (const uid of selectedAttendees) {
+        const userToAdd = availableUsers.find((u) => u.uid === uid);
+        if (userToAdd) {
+          await addMeetingAttendee(meetingId, {
+            uid: userToAdd.uid,
+            name: userToAdd.name,
+            email: userToAdd.email,
+            checkedIn: false,
+          });
+        }
+      }
 
+      // Refresh meeting data
       const updated = await getMeeting(meetingId);
       if (updated) setMeeting(updated);
+      
+      // Reset
       setShowAddAttendee(false);
-      setSelectedAttendee('');
+      setSelectedAttendees(new Set());
     } catch (error) {
-      console.error('Failed to add attendee:', error);
+      console.error('Failed to add attendees:', error);
+    } finally {
+      setAddingAttendees(false);
+    }
+  };
+
+  const handleToggleAttendee = (uid: string) => {
+    const newSelected = new Set(selectedAttendees);
+    if (newSelected.has(uid)) {
+      newSelected.delete(uid);
+    } else {
+      newSelected.add(uid);
+    }
+    setSelectedAttendees(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedAttendees.size === usersNotInMeeting.length) {
+      setSelectedAttendees(new Set());
+    } else {
+      setSelectedAttendees(new Set(usersNotInMeeting.map(u => u.uid)));
     }
   };
 
@@ -283,25 +310,67 @@ export default function MeetingDetailPage() {
 
               {showAddAttendee && (
                 <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <select
-                    value={selectedAttendee}
-                    onChange={(e) => setSelectedAttendee(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3"
-                  >
-                    <option value="">Select an attendee...</option>
-                    {usersNotInMeeting.map((user) => (
-                      <option key={user.uid} value={user.uid}>
-                        {user.name} ({user.email})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      Select Attendees to Add ({selectedAttendees.size})
+                    </h4>
+                    
+                    {usersNotInMeeting.length > 0 ? (
+                      <>
+                        <div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedAttendees.size === usersNotInMeeting.length && usersNotInMeeting.length > 0}
+                              onChange={handleSelectAll}
+                              className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer"
+                            />
+                            <span className="font-medium text-gray-900">
+                              Select All ({usersNotInMeeting.length})
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-lg border border-gray-200 p-3">
+                          {usersNotInMeeting.map((user) => (
+                            <label key={user.uid} className="flex items-start gap-3 p-2 hover:bg-blue-50 rounded cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedAttendees.has(user.uid)}
+                                onChange={() => handleToggleAttendee(user.uid)}
+                                className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer mt-0.5"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 text-sm">{user.name}</p>
+                                <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                                {user.department && (
+                                  <p className="text-xs text-gray-500">{user.department}</p>
+                                )}
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-gray-600 text-sm">All users are already attendees</p>
+                    )}
+                  </div>
+
                   <div className="flex gap-2">
-                    <Button onClick={handleAddAttendee} variant="primary">
-                      Add
+                    <Button 
+                      onClick={handleAddAttendee} 
+                      variant="primary"
+                      disabled={selectedAttendees.size === 0 || addingAttendees}
+                    >
+                      {addingAttendees ? 'Adding...' : `Add ${selectedAttendees.size > 0 ? selectedAttendees.size : ''} Attendee${selectedAttendees.size !== 1 ? 's' : ''}`}
                     </Button>
                     <Button
-                      onClick={() => setShowAddAttendee(false)}
+                      onClick={() => {
+                        setShowAddAttendee(false);
+                        setSelectedAttendees(new Set());
+                      }}
                       variant="secondary"
+                      disabled={addingAttendees}
                     >
                       Cancel
                     </Button>

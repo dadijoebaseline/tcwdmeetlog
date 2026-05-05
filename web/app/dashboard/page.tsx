@@ -6,11 +6,38 @@ import { Card } from '@/components/FormElements';
 import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useEffect, useState } from 'react';
+import { getMeetingStats, getMeetingsByCreator } from '@/lib/meeting-service';
 
 export default function DashboardPage() {
-  const { profile, loading } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
+  const { user } = useAuth();
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof getMeetingStats>> | null>(null);
+  const [recentMeetings, setRecentMeetings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (loading) return <LoadingSpinner />;
+  useEffect(() => {
+    if (!user) return;
+
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const meetingStats = await getMeetingStats(user.uid);
+        setStats(meetingStats);
+
+        const meetings = await getMeetingsByCreator(user.uid);
+        setRecentMeetings(meetings.slice(0, 5)); // Last 5 meetings
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, [user]);
+
+  if (authLoading || loading) return <LoadingSpinner />;
 
   return (
     <ProtectedRoute requiredRole="hr">
@@ -27,20 +54,28 @@ export default function DashboardPage() {
 
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <Card>
-              <div className="text-3xl font-bold text-blue-600 mb-2">0</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {stats?.totalMeetings || 0}
+              </div>
+              <p className="text-gray-600 text-sm">Total Meetings</p>
+            </Card>
+            <Card>
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                {stats?.activeMeetings || 0}
+              </div>
               <p className="text-gray-600 text-sm">Active Meetings</p>
             </Card>
             <Card>
-              <div className="text-3xl font-bold text-green-600 mb-2">0</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">
+                {stats?.totalAttendees || 0}
+              </div>
               <p className="text-gray-600 text-sm">Total Attendees</p>
             </Card>
             <Card>
-              <div className="text-3xl font-bold text-purple-600 mb-2">0</div>
-              <p className="text-gray-600 text-sm">Check-ins Today</p>
-            </Card>
-            <Card>
-              <div className="text-3xl font-bold text-orange-600 mb-2">0%</div>
-              <p className="text-gray-600 text-sm">Attendance Rate</p>
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {stats?.averageAttendanceRate || 0}%
+              </div>
+              <p className="text-gray-600 text-sm">Avg Attendance Rate</p>
             </Card>
           </div>
 
@@ -80,13 +115,36 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <Card className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-            <div className="text-center py-12 text-gray-500">
-              <p>No recent meetings yet</p>
-              <p className="text-sm">Create your first meeting to get started</p>
-            </div>
-          </Card>
+          {recentMeetings.length > 0 && (
+            <Card className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Meetings</h2>
+              <div className="space-y-3">
+                {recentMeetings.map((meeting) => (
+                  <Link key={meeting.id} href={`/dashboard/meetings/${meeting.id}`}>
+                    <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">{meeting.title}</p>
+                          <p className="text-sm text-gray-600">
+                            {meeting.date} at {meeting.time} • {meeting.venue}
+                          </p>
+                        </div>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            meeting.status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {meeting.status === 'active' ? 'Active' : 'Archived'}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          )}
 
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
@@ -98,13 +156,13 @@ export default function DashboardPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/users" className="text-blue-600 hover:text-blue-700 font-medium">
-                    👥 View all users
+                  <Link href="/dashboard/meetings" className="text-blue-600 hover:text-blue-700 font-medium">
+                    📅 View all meetings
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/reports" className="text-blue-600 hover:text-blue-700 font-medium">
-                    📊 Generate reports
+                  <Link href="/dashboard/users" className="text-blue-600 hover:text-blue-700 font-medium">
+                    👥 View all users
                   </Link>
                 </li>
                 <li>

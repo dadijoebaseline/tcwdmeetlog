@@ -83,23 +83,19 @@ export default function EditProfilePage() {
                 required
               />
 
-              {profile?.role === 'attendee' && (
-                <>
-                  <Input
-                    label="Department"
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    placeholder="e.g., Water Quality"
-                  />
+              <Input
+                label="Department"
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                placeholder="e.g., Water Quality"
+              />
 
-                  <Input
-                    label="Position"
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    placeholder="e.g., Technician"
-                  />
-                </>
-              )}
+              <Input
+                label="Position"
+                value={formData.position}
+                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                placeholder="e.g., Technician"
+              />
 
               <div className="flex gap-4">
                 <Button type="submit" isLoading={saving}>

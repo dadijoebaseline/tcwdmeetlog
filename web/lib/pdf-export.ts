@@ -13,16 +13,24 @@ export interface MeetingExportData {
   allUsers: UserProfile[];
 }
 
-/** Load logo as base64 data URL from /public */
-async function loadLogoBase64(): Promise<string | null> {
+/** Load logo as base64 + natural dimensions */
+async function loadLogo(): Promise<{ data: string; w: number; h: number } | null> {
   try {
     const res = await fetch('/official-logo.png');
     const blob = await res.blob();
-    return await new Promise((resolve) => {
+    const data = await new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.readAsDataURL(blob);
     });
+    // Get natural pixel dimensions via an Image element
+    const { w, h } = await new Promise<{ w: number; h: number }>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      img.onerror = () => resolve({ w: 1, h: 1 });
+      img.src = data;
+    });
+    return { data, w, h };
   } catch {
     return null;
   }
@@ -61,27 +69,29 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   const contentW = pageW - marginL - marginR;
 
   // ── HEADER ────────────────────────────────────────────────────────────────
-  const logoBase64 = await loadLogoBase64();
-  const logoSize = 22; // mm
+  const logo = await loadLogo();
+  const logoTargetH = 24; // fixed rendered height in mm
+  const logoW = logo ? (logo.w / logo.h) * logoTargetH : 0; // proportional width
   const headerTop = 10;
+  const centerX = pageW / 2;
 
-  if (logoBase64) {
-    doc.addImage(logoBase64, 'PNG', marginL, headerTop, logoSize, logoSize);
+  if (logo) {
+    doc.addImage(logo.data, 'PNG', marginL, headerTop, logoW, logoTargetH);
   }
 
-  const textX = marginL + (logoBase64 ? logoSize + 5 : 0);
-
+  // "TOLEDO CITY WATER DISTRICT" — centered on full page
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('TOLEDO CITY WATER DISTRICT', textX, headerTop + 7);
+  doc.text('TOLEDO CITY WATER DISTRICT', centerX, headerTop + 8, { align: 'center' });
 
+  // "A T T E N D A N C E" — centered on full page
   doc.setFontSize(18);
-  doc.setCharSpace(4);
-  doc.text('ATTENDANCE', textX, headerTop + 16);
+  doc.setCharSpace(5);
+  doc.text('ATTENDANCE', centerX, headerTop + 18, { align: 'center' });
   doc.setCharSpace(0);
 
   // Divider
-  const dividerY = headerTop + logoSize + 4;
+  const dividerY = headerTop + logoTargetH + 4;
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
   doc.line(marginL, dividerY, pageW - marginR, dividerY);
@@ -126,8 +136,8 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   // ── TOPICS TABLE ──────────────────────────────────────────────────────────
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  doc.text('TOPICS / AGENDA', marginL, y + 3);
-  y += 2;
+  doc.text('TOPICS / AGENDA', marginL, y);
+  y += 5; // gap between label and table header
 
   autoTable(doc, {
     startY: y,
@@ -164,7 +174,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   doc.setFontSize(9);
   doc.text('ATTENDANCE RECORD', marginL, afterTopics);
 
-  // Build rows — enrich with department/position from allUsers
+  // Build rows
   const userMap = new Map(data.allUsers.map((u) => [u.uid, u]));
 
   // Sort: checked-in first, then by name
@@ -193,7 +203,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   }
 
   autoTable(doc, {
-    startY: afterTopics + 2,
+    startY: afterTopics + 5,
     margin: { left: marginL, right: marginR },
     head: [['#', 'Name', 'Department', 'Position', 'IN', 'OUT', 'SIGNATURE']],
     body: rows,

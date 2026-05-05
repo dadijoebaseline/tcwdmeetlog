@@ -70,7 +70,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
 
   // ── HEADER ────────────────────────────────────────────────────────────────
   const logo = await loadLogo();
-  const logoTargetH = 24; // fixed rendered height in mm
+  const logoTargetH = 20; // fixed rendered height in mm
   const logoW = logo ? (logo.w / logo.h) * logoTargetH : 0; // proportional width
   const headerTop = 10;
 

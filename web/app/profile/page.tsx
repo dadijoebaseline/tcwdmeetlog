@@ -15,32 +15,32 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="mb-8 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">My Profile</h1>
-              <p className="text-gray-600 mt-2">View and manage your account information</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">My Profile</h1>
+              <p className="text-xs sm:text-sm text-gray-600 mt-2">View and manage your account information</p>
             </div>
             <Link href="/profile/edit">
               <Button>Edit Profile</Button>
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <Card>
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Account Information</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Account Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Email</label>
-                  <p className="text-gray-900 mt-1">{profile?.email}</p>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Email</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1">{profile?.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Full Name</label>
-                  <p className="text-gray-900 mt-1">{profile?.name}</p>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Full Name</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1">{profile?.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Role</label>
-                  <p className="text-gray-900 mt-1 capitalize">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Role</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1 capitalize">
                     {profile?.role === 'hr' ? 'HR Manager' : 'Attendee'}
                   </p>
                 </div>
@@ -48,19 +48,19 @@ export default function ProfilePage() {
             </Card>
 
             <Card>
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Additional Information</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Additional Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Department</label>
-                  <p className="text-gray-900 mt-1">{profile?.department || 'Not specified'}</p>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Department</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1">{profile?.department || 'Not specified'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Position</label>
-                  <p className="text-gray-900 mt-1">{profile?.position || 'Not specified'}</p>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Position</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1">{profile?.position || 'Not specified'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Account Created</label>
-                  <p className="text-gray-900 mt-1">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">Account Created</label>
+                  <p className="text-sm sm:text-base text-gray-900 mt-1">
                     {profile?.createdAt
                       ? new Date(profile.createdAt).toLocaleDateString()
                       : 'Unknown'}
@@ -70,9 +70,14 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {profile?.role === 'attendee' && (
+          {(profile?.role === 'attendee' || profile?.role === 'hr') && (
             <Card className="mt-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Digital Signature</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Digital Signature</h2>
+                <Link href="/profile/edit">
+                  <Button variant="secondary" className="text-xs w-full sm:w-auto">Edit</Button>
+                </Link>
+              </div>
               <div className="flex flex-col items-center">
                 {profile?.digitalSignature ? (
                   <div className="w-full flex flex-col items-center">
@@ -82,27 +87,27 @@ export default function ProfilePage() {
                       className="border-2 border-gray-300 rounded-lg p-4 bg-white"
                       style={{ maxWidth: '100%', height: 'auto' }}
                     />
-                    <p className="text-xs text-gray-500 mt-3">Your signature as captured during account setup</p>
+                    <p className="text-xs text-gray-500 mt-3">{profile?.role === 'hr' ? 'Your signature for approval documents' : 'Your signature as captured during account setup'}</p>
                   </div>
                 ) : (
-                  <p className="text-gray-600">No signature on file</p>
+                  <p className="text-sm sm:text-base text-gray-600">No signature on file</p>
                 )}
               </div>
             </Card>
           )}
 
           <Card className="mt-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Account Status</h2>
-            <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Account Status</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
               <div>
-                <p className="text-gray-600">Current Status</p>
-                <p className="text-2xl font-bold text-green-600 mt-2">
+                <p className="text-xs sm:text-sm text-gray-600">Current Status</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">
                   {profile?.isActive !== false ? '✓ Active' : '✗ Inactive'}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-gray-600">Last Login</p>
-                <p className="text-gray-900 mt-2">
+              <div className="sm:text-right">
+                <p className="text-xs sm:text-sm text-gray-600">Last Login</p>
+                <p className="text-sm sm:text-base text-gray-900 mt-2">
                   {profile?.lastLoginAt
                     ? new Date(profile.lastLoginAt).toLocaleString()
                     : 'Just now'}

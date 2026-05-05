@@ -6,6 +6,8 @@ import { UserProfile } from '@/lib/auth-context';
 import { ProtectedRoute } from '@/lib/route-guard';
 import { Card, Input } from '@/components/FormElements';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { SignaturePad } from '@/components/SignaturePad';
+import { Button } from '@/components/Button';
 import {
   getUsersByRole,
   getUserStats,
@@ -34,6 +36,12 @@ export default function UsersPage() {
   const [editForm, setEditForm] = useState<EditForm>({ name: '', department: '', position: '', role: 'attendee' });
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
+
+  // Signature editing state
+  const [signingUser, setSigningUser] = useState<UserProfile | null>(null);
+  const [signatureData, setSignatureData] = useState('');
+  const [signatureSaving, setSignatureSaving] = useState(false);
+  const [signatureError, setSignatureError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -99,6 +107,29 @@ export default function UsersPage() {
       await loadData();
     } catch (err) {
       console.error('Failed to delete user:', err);
+    }
+  };
+
+  const openSignatureEditor = (u: UserProfile) => {
+    setSigningUser(u);
+    setSignatureData(u.digitalSignature || '');
+    setSignatureError('');
+  };
+
+  const handleSaveSignature = async () => {
+    if (!signingUser) return;
+    setSignatureSaving(true);
+    setSignatureError('');
+    try {
+      await updateUserProfile(signingUser.uid, {
+        digitalSignature: signatureData,
+      });
+      setSigningUser(null);
+      await loadData();
+    } catch (err: any) {
+      setSignatureError(err.message || 'Failed to save signature');
+    } finally {
+      setSignatureSaving(false);
     }
   };
 
@@ -199,13 +230,21 @@ export default function UsersPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <button
                               onClick={() => openEdit(u)}
                               className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition"
                             >
                               Edit
                             </button>
+                            {u.role === 'attendee' && (
+                              <button
+                                onClick={() => openSignatureEditor(u)}
+                                className="px-3 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"
+                              >
+                                Signature
+                              </button>
+                            )}
                             {u.uid !== currentUser?.uid && (
                               <button
                                 onClick={() => handleDelete(u)}
@@ -305,6 +344,63 @@ export default function UsersPage() {
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Signature Editor Modal */}
+      {signingUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Edit Digital Signature</h2>
+            <p className="text-sm text-gray-500 mb-4">{signingUser.name} ({signingUser.email})</p>
+
+            {signatureError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {signatureError}
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">Current Signature</label>
+              {signingUser.digitalSignature ? (
+                <div className="flex flex-col items-center mb-6">
+                  <img
+                    src={signingUser.digitalSignature}
+                    alt="Current Signature"
+                    className="border-2 border-gray-300 rounded-lg p-2 bg-white"
+                    style={{ maxWidth: '100%', height: 'auto', maxHeight: '150px' }}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600 mb-6">No signature on file. Draw a new one below.</p>
+              )}
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">Draw New Signature</label>
+              <p className="text-xs text-gray-600 mb-3">Clear the box and draw a new signature, or modify the existing one</p>
+              <SignaturePad
+                onSignatureChange={(sig) => setSignatureData(sig)}
+                onClear={() => setSignatureData('')}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSigningUser(null)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 font-medium transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSignature}
+                disabled={signatureSaving}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition disabled:opacity-60"
+              >
+                {signatureSaving ? 'Saving...' : 'Save Signature'}
               </button>
             </div>
           </div>

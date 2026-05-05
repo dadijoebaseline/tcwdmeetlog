@@ -54,18 +54,18 @@ export default function EditProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Edit Profile</h1>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-8">Edit Profile</h1>
 
           <Card>
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
                 {success}
               </div>
             )}
@@ -100,12 +100,12 @@ export default function EditProfilePage() {
                 placeholder="e.g., Technician"
               />
 
-              {profile?.role === 'attendee' && (
+              {(profile?.role === 'attendee' || profile?.role === 'hr') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Digital Signature
                   </label>
-                  <p className="text-xs text-gray-600 mb-3">Update your signature by drawing in the box below</p>
+                  <p className="text-xs text-gray-600 mb-3">{profile?.role === 'hr' ? 'Set your signature for approval documents by drawing in the box below' : 'Update your signature by drawing in the box below'}</p>
                   <SignaturePad
                     onSignatureChange={(sig) => setFormData({ ...formData, digitalSignature: sig })}
                     onClear={() => setFormData({ ...formData, digitalSignature: '' })}
@@ -113,12 +113,12 @@ export default function EditProfilePage() {
                 </div>
               )}
 
-              <div className="flex gap-4">
-                <Button type="submit" isLoading={saving}>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button type="submit" isLoading={saving} className="flex-1 sm:flex-none">
                   Save Changes
                 </Button>
-                <Link href="/profile">
-                  <Button variant="secondary">Cancel</Button>
+                <Link href="/profile" className="flex-1 sm:flex-none">
+                  <Button variant="secondary" className="w-full">Cancel</Button>
                 </Link>
               </div>
             </form>

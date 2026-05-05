@@ -73,28 +73,23 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   const logoTargetH = 20; // fixed rendered height in mm
   const logoW = logo ? (logo.w / logo.h) * logoTargetH : 0; // proportional width
   const headerTop = 10;
-  const logoGap = 4;
-  const totalHeaderW = logoW + logoGap + (contentW * 0.65); // logo + gap + text area
-  const headerStartX = marginL + (contentW - totalHeaderW) / 2; // center entire block
 
   if (logo) {
-    doc.addImage(logo.data, 'PNG', headerStartX, headerTop, logoW, logoTargetH);
+    doc.addImage(logo.data, 'PNG', marginL, headerTop, logoW, logoTargetH);
   }
 
-  // Text is centered in the space to the right of the logo within the centered block
-  const textAreaStart = headerStartX + logoW + logoGap;
-  const textAreaEnd = headerStartX + totalHeaderW;
-  const textCenterX = textAreaStart + (textAreaEnd - textAreaStart) / 2;
+  // Center text on full page width (independent of logo)
+  const pageCenter = pageW / 2;
 
-  // "TOLEDO CITY WATER DISTRICT" — centered in the text area
+  // "TOLEDO CITY WATER DISTRICT" — centered on page
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('TOLEDO CITY WATER DISTRICT', textCenterX, headerTop + 7, { align: 'center' });
+  doc.text('TOLEDO CITY WATER DISTRICT', pageCenter, headerTop + 7, { align: 'center' });
 
-  // "A T T E N D A N C E" — centered in the same text area
+  // "A T T E N D A N C E" — centered on page
   doc.setFontSize(18);
   doc.setCharSpace(5);
-  doc.text('ATTENDANCE', textCenterX, headerTop + 16, { align: 'center' });
+  doc.text('ATTENDANCE', pageCenter, headerTop + 16, { align: 'center' });
   doc.setCharSpace(0);
 
   // Divider

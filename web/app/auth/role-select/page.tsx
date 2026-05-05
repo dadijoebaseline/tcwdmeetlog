@@ -19,6 +19,7 @@ function RoleSelectForm() {
     position: '',
     digitalSignature: '',
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,6 +33,20 @@ function RoleSelectForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validation for attendee role
+    if (role === 'attendee') {
+      if (!formData.department || !formData.position || !formData.digitalSignature) {
+        setError('Please fill in all required fields');
+        setLoading(false);
+        return;
+      }
+      if (!agreedToTerms) {
+        setError('Please agree to the User Agreement & Data Privacy Consent to continue');
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       const user = auth.currentUser;
@@ -122,36 +137,75 @@ function RoleSelectForm() {
           </div>
 
           {role === 'attendee' && (
-            <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
-              <Input
-                label="Department"
-                placeholder="e.g., Water Quality"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                required
-              />
-              <Input
-                label="Position"
-                placeholder="e.g., Technician"
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                required
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Digital Signature *
-                </label>
-                <p className="text-xs text-gray-600 mb-3">Draw your signature in the box below</p>
-                <SignaturePad
-                  onSignatureChange={(sig) => setFormData({ ...formData, digitalSignature: sig })}
-                  onClear={() => setFormData({ ...formData, digitalSignature: '' })}
+            <div className="space-y-6">
+              {/* Data Privacy Statement */}
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <h3 className="font-semibold text-amber-900 mb-2">📋 Data Privacy Statement</h3>
+                <p className="text-sm text-amber-800">
+                  We value and respect the privacy of all attendees. Any data collected through this digital attendance system—including names, session details, and digital signatures—will be securely stored and protected.
+                </p>
+              </div>
+
+              {/* Form Fields */}
+              <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
+                <Input
+                  label="Department"
+                  placeholder="e.g., Water Quality"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  required
                 />
+                <Input
+                  label="Position"
+                  placeholder="e.g., Technician"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  required
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Digital Signature *
+                  </label>
+                  <p className="text-xs text-gray-600 mb-3">Draw your signature in the box below</p>
+                  <SignaturePad
+                    onSignatureChange={(sig) => setFormData({ ...formData, digitalSignature: sig })}
+                    onClear={() => setFormData({ ...formData, digitalSignature: '' })}
+                  />
+                </div>
+              </div>
+
+              {/* User Agreement */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg max-h-64 overflow-y-auto">
+                <h3 className="font-semibold text-gray-900 mb-3">✓ User Agreement & Data Privacy Consent</h3>
+                <div className="text-sm text-gray-700 space-y-2 mb-4">
+                  <p>Before signing up, please read and agree to the following:</p>
+                  <ul className="list-disc list-inside space-y-2 ml-2">
+                    <li>I understand that my personal information and digital signature will be collected solely for attendance and compliance purposes.</li>
+                    <li>I acknowledge that all data will be securely stored in an encrypted database and protected against unauthorized access.</li>
+                    <li>I agree that my signature provided via mobile device (finger input) will serve as my official attendance record.</li>
+                    <li>I consent to the use of my data in accordance with organizational policies and applicable data protection regulations.</li>
+                    <li>I understand that only authorized personnel may access attendance records, and my data will not be shared with third parties without my consent.</li>
+                  </ul>
+                  <p className="font-semibold mt-3">By clicking "Agree & Continue," I confirm that I have read, understood, and accepted the terms above.</p>
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-1 w-4 h-4 cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    I agree to the User Agreement & Data Privacy Consent *
+                  </span>
+                </label>
               </div>
             </div>
           )}
 
           <Button type="submit" isLoading={loading} className="w-full">
-            Continue
+            {role === 'attendee' ? 'Agree & Continue' : 'Continue'}
           </Button>
         </form>
       </Card>

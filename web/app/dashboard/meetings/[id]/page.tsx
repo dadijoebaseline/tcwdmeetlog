@@ -262,9 +262,9 @@ export default function MeetingDetailPage() {
 
               <div className="pt-8 border-t border-gray-200">
                 <h3 className="text-lg font-bold text-gray-900 mb-6">
-                  QR Code for Check-in
+                  QR Codes for Check-in & Check-out
                 </h3>
-                <QRCodeDisplay meetingId={meeting.id} meetingTitle={meeting.title} />
+                <QRCodeDisplay meetingId={meeting.id} meetingTitle={meeting.title} showBoth={true} />
               </div>
             </Card>
           )}

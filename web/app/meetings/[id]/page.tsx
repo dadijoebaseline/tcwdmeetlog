@@ -36,9 +36,10 @@ export default function AttendeeMeetingDetailPage() {
   const handleScan = async (raw: string) => {
     setShowScanner(false);
     try {
-      // QR payload: { meetingId, meetingTitle, timestamp }
+      // QR payload: { meetingId, meetingTitle, type, timestamp }
       const payload = JSON.parse(raw);
       const scannedId = payload?.meetingId;
+      const qrType = payload?.type || 'check-in'; // Default to check-in for backward compatibility
 
       if (!scannedId) {
         setCheckInStatus('error');
@@ -54,7 +55,10 @@ export default function AttendeeMeetingDetailPage() {
 
       if (!user) return;
 
-      if (scanMode === 'check-in') {
+      // Use the type from QR code if available, otherwise use scanMode
+      const actionType = qrType === 'check-out' ? 'check-out' : 'check-in';
+
+      if (actionType === 'check-in') {
         await recordAttendeeCheckIn(meetingId, user.uid);
       } else {
         await recordAttendeeCheckOut(meetingId, user.uid);

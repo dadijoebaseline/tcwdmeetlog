@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ProtectedRoute } from '@/lib/route-guard';
-import { createMeeting, updateMeetingQRCode } from '@/lib/meeting-service';
+import { createMeeting, updateMeetingQRCode, updateMeetingCheckOutQRCode } from '@/lib/meeting-service';
 import { MeetingForm } from '@/components/MeetingForm';
 import { Card } from '@/components/FormElements';
 import { QRCodeSVG } from 'qrcode.react';
@@ -32,12 +32,24 @@ export default function CreateMeetingPage() {
       setIsLoading(true);
       const meetingId = await createMeeting({ ...data, createdBy: user.uid });
 
-      const qrValue = JSON.stringify({
+      // Generate check-in QR code
+      const checkInQRValue = JSON.stringify({
         meetingId,
         meetingTitle: data.title,
+        type: 'check-in',
         timestamp: new Date().toISOString(),
       });
-      await updateMeetingQRCode(meetingId, qrValue);
+      await updateMeetingQRCode(meetingId, checkInQRValue);
+
+      // Generate check-out QR code
+      const checkOutQRValue = JSON.stringify({
+        meetingId,
+        meetingTitle: data.title,
+        type: 'check-out',
+        timestamp: new Date().toISOString(),
+      });
+      await updateMeetingCheckOutQRCode(meetingId, checkOutQRValue);
+
       router.push(`/dashboard/meetings/${meetingId}`);
     } catch (error) {
       console.error('Failed to create meeting:', error);

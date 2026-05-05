@@ -31,7 +31,8 @@ export interface Meeting {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   attendees: MeetingAttendee[];
-  qrCode?: string; // QR code data URL
+  qrCode?: string; // QR code data for check-in
+  qrCodeCheckOut?: string; // QR code data for check-out
   status: 'active' | 'archived'; // active or archived
 }
 
@@ -226,6 +227,20 @@ export async function updateMeetingQRCode(
   const meetingRef = doc(db, 'meetings', meetingId);
   await updateDoc(meetingRef, {
     qrCode: qrCodeData,
+    updatedAt: Timestamp.now(),
+  });
+}
+
+/**
+ * Update checkout QR code for meeting
+ */
+export async function updateMeetingCheckOutQRCode(
+  meetingId: string,
+  qrCodeData: string
+): Promise<void> {
+  const meetingRef = doc(db, 'meetings', meetingId);
+  await updateDoc(meetingRef, {
+    qrCodeCheckOut: qrCodeData,
     updatedAt: Timestamp.now(),
   });
 }

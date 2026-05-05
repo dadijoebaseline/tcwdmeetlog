@@ -108,15 +108,20 @@ export async function getMeetingsByStatus(
 ): Promise<Meeting[]> {
   const q = query(
     collection(db, 'meetings'),
-    where('status', '==', status),
-    orderBy('date', 'desc')
+    where('status', '==', status)
   );
   const querySnapshot = await getDocs(q);
 
-  return querySnapshot.docs.map((doc) => ({
+  const meetings = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   })) as Meeting[];
+
+  return meetings.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() ?? 0;
+    const bTime = b.createdAt?.toMillis?.() ?? 0;
+    return bTime - aTime;
+  });
 }
 
 /**
@@ -125,15 +130,21 @@ export async function getMeetingsByStatus(
 export async function getMeetingsByCreator(userId: string): Promise<Meeting[]> {
   const q = query(
     collection(db, 'meetings'),
-    where('createdBy', '==', userId),
-    orderBy('createdAt', 'desc')
+    where('createdBy', '==', userId)
   );
   const querySnapshot = await getDocs(q);
 
-  return querySnapshot.docs.map((doc) => ({
+  const meetings = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   })) as Meeting[];
+
+  // Sort client-side to avoid requiring a composite Firestore index
+  return meetings.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() ?? 0;
+    const bTime = b.createdAt?.toMillis?.() ?? 0;
+    return bTime - aTime;
+  });
 }
 
 /**

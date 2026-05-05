@@ -139,7 +139,7 @@ function RoleSelectForm() {
           {role === 'attendee' && (
             <div className="space-y-6">
               {/* Data Privacy Statement */}
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
                 <h3 className="font-semibold text-amber-900 mb-2">📋 Data Privacy Statement</h3>
                 <p className="text-sm text-amber-800">
                   We value and respect the privacy of all attendees. Any data collected through this digital attendance system, including names, session details, and digital signatures, will be securely stored and protected.

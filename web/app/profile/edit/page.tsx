@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { ProtectedRoute } from '@/lib/route-guard';
 import { Card, Input } from '@/components/FormElements';
 import { Button } from '@/components/Button';
+import { SignaturePad } from '@/components/SignaturePad';
 import Link from 'next/link';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
@@ -17,6 +18,7 @@ export default function EditProfilePage() {
     name: profile?.name || '',
     department: profile?.department || '',
     position: profile?.position || '',
+    digitalSignature: profile?.digitalSignature || '',
   });
 
   const [saving, setSaving] = useState(false);
@@ -36,6 +38,7 @@ export default function EditProfilePage() {
         name: formData.name,
         department: formData.department,
         position: formData.position,
+        digitalSignature: formData.digitalSignature,
       });
 
       setSuccess('Profile updated successfully!');
@@ -96,6 +99,19 @@ export default function EditProfilePage() {
                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                 placeholder="e.g., Technician"
               />
+
+              {profile?.role === 'attendee' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Digital Signature
+                  </label>
+                  <p className="text-xs text-gray-600 mb-3">Update your signature by drawing in the box below</p>
+                  <SignaturePad
+                    onSignatureChange={(sig) => setFormData({ ...formData, digitalSignature: sig })}
+                    onClear={() => setFormData({ ...formData, digitalSignature: '' })}
+                  />
+                </div>
+              )}
 
               <div className="flex gap-4">
                 <Button type="submit" isLoading={saving}>

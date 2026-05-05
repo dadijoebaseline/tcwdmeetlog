@@ -41,6 +41,7 @@ export default function MeetingDetailPage() {
   const [showAddAttendee, setShowAddAttendee] = useState(false);
   const [selectedAttendees, setSelectedAttendees] = useState<Set<string>>(new Set());
   const [addingAttendees, setAddingAttendees] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const loadMeetingData = async () => {

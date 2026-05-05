@@ -70,6 +70,27 @@ export default function ProfilePage() {
             </Card>
           </div>
 
+          {profile?.role === 'attendee' && (
+            <Card className="mt-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Digital Signature</h2>
+              <div className="flex flex-col items-center">
+                {profile?.digitalSignature ? (
+                  <div className="w-full flex flex-col items-center">
+                    <img
+                      src={profile.digitalSignature}
+                      alt="Digital Signature"
+                      className="border-2 border-gray-300 rounded-lg p-4 bg-white"
+                      style={{ maxWidth: '100%', height: 'auto' }}
+                    />
+                    <p className="text-xs text-gray-500 mt-3">Your signature as captured during account setup</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-600">No signature on file</p>
+                )}
+              </div>
+            </Card>
+          )}
+
           <Card className="mt-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Account Status</h2>
             <div className="flex items-center justify-between">

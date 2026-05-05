@@ -197,6 +197,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   interface SignatureInfo {
     rowIndex: number;
     signatureData: string;
+    attendeeName: string;
   }
   const signaturesNeeded: SignatureInfo[] = [];
 
@@ -210,7 +211,11 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
       signaturesNeeded.push({
         rowIndex: i,
         signatureData: profile.digitalSignature,
+        attendeeName: att.name,
       });
+      console.log(`[PDF] Signature queued for ${att.name}: ${profile.digitalSignature.substring(0, 50)}...`);
+    } else if (att.checkedOut && !profile?.digitalSignature) {
+      console.log(`[PDF] Attendee ${att.name} checked out but has no signature`);
     }
     
     return [
@@ -268,19 +273,35 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   // ── ADD SIGNATURE IMAGES ──────────────────────────────────────────────────
   // Add digital signatures for attendees who checked out
   if (signaturesNeeded.length > 0) {
+    console.log(`[PDF] Attempting to add ${signaturesNeeded.length} signatures`);
+    
     const tableMetadata = (doc as any).lastAutoTable;
     const rowHeight = 12; // Match minCellHeight from bodyStyles
-    const signatureColX = marginL + 8 + contentW * 0.24 + contentW * 0.2 + contentW * 0.18 + contentW * 0.1 + contentW * 0.1 + 1; // Start of SIGNATURE column
-    const signatureColWidth = contentW * 0.15 - 2; // Signature column width with padding
-    const signatureImgSize = 10; // Size of signature image in mm
+    
+    // Calculate signature column position more accurately
+    const col0Width = 8;
+    const col1Width = contentW * 0.24;
+    const col2Width = contentW * 0.2;
+    const col3Width = contentW * 0.18;
+    const col4Width = contentW * 0.1;
+    const col5Width = contentW * 0.1;
+    const col6Width = contentW * 0.15;
+    
+    const signatureColX = marginL + col0Width + col1Width + col2Width + col3Width + col4Width + col5Width + 2;
+    const signatureImgSize = 12; // Size of signature image in mm
+    const signatureImgHeight = 6; // Aspect ratio for typical signatures
 
     for (const sigInfo of signaturesNeeded) {
       try {
-        // Calculate Y position of the row (header + row offset)
-        const rowY = tableStartY + 8 + sigInfo.rowIndex * rowHeight + 1; // +8 for header, +1 for padding
+        // Calculate Y position: table starts at tableStartY, header is 8mm, each row is 12mm
+        // Row index from sorted array maps to actual table rows
+        const headerHeight = 8;
+        const rowY = tableStartY + headerHeight + (sigInfo.rowIndex * rowHeight) + 1; // +1 for top padding
         
         // Center signature image in the column
-        const imgX = signatureColX + (signatureColWidth - signatureImgSize) / 2;
+        const imgX = signatureColX + (col6Width - signatureImgSize) / 2;
+        
+        console.log(`[PDF] Adding signature for ${sigInfo.attendeeName} at row ${sigInfo.rowIndex}, Y=${rowY}, X=${imgX}`);
         
         doc.addImage(
           sigInfo.signatureData,
@@ -288,12 +309,15 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
           imgX,
           rowY,
           signatureImgSize,
-          signatureImgSize * 0.5 // Aspect ratio for typical signatures
+          signatureImgHeight
         );
+        console.log(`[PDF] Signature added successfully for ${sigInfo.attendeeName}`);
       } catch (err) {
-        console.warn(`Failed to add signature for attendee at row ${sigInfo.rowIndex}:`, err);
+        console.error(`[PDF] Failed to add signature for ${sigInfo.attendeeName} at row ${sigInfo.rowIndex}:`, err);
       }
     }
+  } else {
+    console.log(`[PDF] No signatures to add`);
   }
 
   // ── FOOTER ────────────────────────────────────────────────────────────────

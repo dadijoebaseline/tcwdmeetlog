@@ -193,10 +193,26 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
     return a.checkedIn ? -1 : 1;
   });
 
+  // Track signature data for attendees who checked out
+  interface SignatureInfo {
+    rowIndex: number;
+    signatureData: string;
+  }
+  const signaturesNeeded: SignatureInfo[] = [];
+
   const rows = sorted.map((att, i) => {
     const profile = userMap.get(att.uid);
     const inTime = att.checkedIn && att.checkInTime ? formatTime(att.checkInTime) : '';
     const outTime = att.checkedOut && att.checkOutTime ? formatTime(att.checkOutTime) : '';
+    
+    // If attendee checked out and has a digital signature, queue it for adding to PDF
+    if (att.checkedOut && profile?.digitalSignature) {
+      signaturesNeeded.push({
+        rowIndex: i,
+        signatureData: profile.digitalSignature,
+      });
+    }
+    
     return [
       String(i + 1),
       att.name || '',
@@ -204,7 +220,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
       profile?.position || '',
       inTime,
       outTime, // OUT — now includes checkout time if available
-      '', // SIGNATURE — always blank
+      '', // SIGNATURE — will add images after table is created
     ];
   });
 
@@ -213,8 +229,10 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
     rows.push([String(rows.length + 1), '', '', '', '', '', '']);
   }
 
+  const tableStartY = afterTopics + 5;
+  
   autoTable(doc, {
-    startY: afterTopics + 5,
+    startY: tableStartY,
     margin: { left: marginL, right: marginR },
     head: [['#', 'Name', 'Department', 'Position', 'IN', 'OUT', 'SIGNATURE']],
     body: rows,
@@ -224,7 +242,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
       fontStyle: 'bold',
       fontSize: 8,
     },
-    bodyStyles: { fontSize: 8, minCellHeight: 8 },
+    bodyStyles: { fontSize: 8, minCellHeight: 12 },
     columnStyles: {
       0: { cellWidth: 8 },
       1: { cellWidth: contentW * 0.24 },
@@ -246,6 +264,37 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
       }
     },
   });
+
+  // ── ADD SIGNATURE IMAGES ──────────────────────────────────────────────────
+  // Add digital signatures for attendees who checked out
+  if (signaturesNeeded.length > 0) {
+    const tableMetadata = (doc as any).lastAutoTable;
+    const rowHeight = 12; // Match minCellHeight from bodyStyles
+    const signatureColX = marginL + 8 + contentW * 0.24 + contentW * 0.2 + contentW * 0.18 + contentW * 0.1 + contentW * 0.1 + 1; // Start of SIGNATURE column
+    const signatureColWidth = contentW * 0.15 - 2; // Signature column width with padding
+    const signatureImgSize = 10; // Size of signature image in mm
+
+    for (const sigInfo of signaturesNeeded) {
+      try {
+        // Calculate Y position of the row (header + row offset)
+        const rowY = tableStartY + 8 + sigInfo.rowIndex * rowHeight + 1; // +8 for header, +1 for padding
+        
+        // Center signature image in the column
+        const imgX = signatureColX + (signatureColWidth - signatureImgSize) / 2;
+        
+        doc.addImage(
+          sigInfo.signatureData,
+          'PNG',
+          imgX,
+          rowY,
+          signatureImgSize,
+          signatureImgSize * 0.5 // Aspect ratio for typical signatures
+        );
+      } catch (err) {
+        console.warn(`Failed to add signature for attendee at row ${sigInfo.rowIndex}:`, err);
+      }
+    }
+  }
 
   // ── FOOTER ────────────────────────────────────────────────────────────────
   const pageCount = (doc.internal as any).getNumberOfPages();

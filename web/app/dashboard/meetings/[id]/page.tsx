@@ -160,6 +160,7 @@ export default function MeetingDetailPage() {
         date: meeting.date,
         time: meeting.time,
         description: meeting.description,
+        resourceSpeaker: meeting.resourceSpeaker,
         attendees: meeting.attendees,
         allUsers: availableUsers,
       });
@@ -244,6 +245,12 @@ export default function MeetingDetailPage() {
                     {meeting.status === 'active' ? '🟢 Active' : '⚪ Archived'}
                   </span>
                 </div>
+                {meeting.resourceSpeaker && (
+                  <div>
+                    <p className="text-sm text-gray-600">Resource Speaker</p>
+                    <p className="text-xl font-semibold text-gray-900">{meeting.resourceSpeaker}</p>
+                  </div>
+                )}
               </div>
 
               {meeting.description && (

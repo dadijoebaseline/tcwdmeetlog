@@ -40,6 +40,7 @@ export default function EditMeetingPage() {
     time: string;
     venue: string;
     description?: string;
+    resourceSpeaker?: string;
   }) => {
     if (!meeting) return;
 

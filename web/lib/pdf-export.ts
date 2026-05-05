@@ -297,9 +297,22 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
     const rows = tableMetadata?.rows || [];
     
     console.log(`[PDF DEBUG] Table has ${cols.length} columns, ${rows.length} rows`);
+    console.log(`[PDF DEBUG] Available metadata properties:`, Object.keys(tableMetadata || {}).join(', '));
     
     if (cols.length > 0) {
-      console.log(`[PDF] All column X positions:`, cols.map((c: any, i: number) => `Col${i}: X=${c.x.toFixed(2)}, W=${c.width.toFixed(2)}`).join(' | '));
+      try {
+        const colInfo = cols
+          .map((c: any, i: number) => {
+            if (c.x !== undefined && c.width !== undefined) {
+              return `Col${i}: X=${c.x.toFixed(2)}, W=${c.width.toFixed(2)}`;
+            }
+            return `Col${i}: missing x or width`;
+          })
+          .join(' | ');
+        console.log(`[PDF] Column positions:`, colInfo);
+      } catch (e) {
+        console.warn(`[PDF] Could not format column info:`, e);
+      }
     }
 
     for (const sigInfo of signaturesNeeded) {
@@ -313,12 +326,13 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
         let rowY: number;
         let rowHeight = 16; // match minCellHeight
         
-        if (rows.length > sigInfo.rowIndex && rows[sigInfo.rowIndex]) {
+        if (rows && rows.length > sigInfo.rowIndex && rows[sigInfo.rowIndex]) {
           rowY = rows[sigInfo.rowIndex].y + (rowHeight / 2);
           console.log(`  - Using metadata: row Y = ${rowY.toFixed(2)}`);
         } else {
           // Fallback: estimate based on table start and row heights
-          rowY = tableMetadata.startY + 10 + (sigInfo.rowIndex * rowHeight) + (rowHeight / 2);
+          const startYValue = tableMetadata?.startY || tableStartY;
+          rowY = startYValue + 10 + (sigInfo.rowIndex * rowHeight) + (rowHeight / 2);
           console.log(`  - Using fallback calculation: row Y = ${rowY.toFixed(2)}`);
         }
 
@@ -326,10 +340,12 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
         let signatureColX = marginL;
         let signatureColWidth = 30;
         
-        if (cols.length > 6 && cols[6]) {
+        if (cols && cols.length > 6 && cols[6] && cols[6].x !== undefined && cols[6].width !== undefined) {
           signatureColX = cols[6].x;
           signatureColWidth = cols[6].width;
           console.log(`  - Using metadata column: X=${signatureColX.toFixed(2)}, W=${signatureColWidth.toFixed(2)}`);
+        } else {
+          console.log(`  - Using fallback column position`);
         }
         
         const signatureImgSize = 12; // 12mm wide

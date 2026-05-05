@@ -148,6 +148,27 @@ export async function getMeetingsByCreator(userId: string): Promise<Meeting[]> {
 }
 
 /**
+ * Get all meetings where a user is listed as an attendee (client-side filter)
+ */
+export async function getMeetingsByAttendee(userId: string): Promise<Meeting[]> {
+  const q = query(
+    collection(db, 'meetings'),
+    where('status', '==', 'active')
+  );
+  const querySnapshot = await getDocs(q);
+
+  const meetings = querySnapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() } as Meeting))
+    .filter((m) => m.attendees?.some((att) => att.uid === userId));
+
+  return meetings.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() ?? 0;
+    const bTime = b.createdAt?.toMillis?.() ?? 0;
+    return bTime - aTime;
+  });
+}
+
+/**
  * Search meetings by title (client-side)
  */
 export function searchMeetings(

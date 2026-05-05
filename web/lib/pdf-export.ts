@@ -270,111 +270,49 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
         }
       }
     },
+    // Draw signature images in the SIGNATURE column (column 6)
+    didDrawCell: (hookData) => {
+      if (hookData.section === 'body' && hookData.column.index === 6) {
+        const attIdx = hookData.row.index;
+        if (attIdx < sorted.length && sorted[attIdx]) {
+          const att = sorted[attIdx];
+          const profile = userMap.get(att.uid);
+          
+          // Draw signature if attendee checked out and has a signature
+          if (att.checkedOut && profile?.digitalSignature) {
+            try {
+              const cell = hookData.cell;
+              const imgSize = 10; // 10mm wide
+              const imgHeight = 5; // 5mm tall
+              
+              // Center image in cell
+              const imgX = cell.x + (cell.width - imgSize) / 2;
+              const imgY = cell.y + (cell.height - imgHeight) / 2;
+              
+              console.log(`[PDF] Drawing signature in cell - X: ${imgX.toFixed(2)}, Y: ${imgY.toFixed(2)}, Size: ${imgSize}x${imgHeight}mm`);
+              
+              doc.addImage(
+                profile.digitalSignature,
+                'PNG',
+                imgX,
+                imgY,
+                imgSize,
+                imgHeight
+              );
+              console.log(`[PDF] ✓ Signature drawn for ${att.name}`);
+            } catch (err: any) {
+              console.error(`[PDF] ✗ Failed to draw signature for ${att.name}:`, err?.message || err);
+            }
+          }
+        }
+      }
+    },
   });
 
-  // ── ADD SIGNATURE IMAGES ──────────────────────────────────────────────────
-  // Add digital signatures for attendees who checked out
-  console.log(`[PDF DEBUG] signaturesNeeded array:`, signaturesNeeded);
-  console.log(`[PDF DEBUG] Total signatures to add: ${signaturesNeeded.length}`);
-  
-  if (signaturesNeeded.length > 0) {
-    console.log(`[PDF] Attempting to add ${signaturesNeeded.length} signatures`);
-    
-    const tableMetadata = (doc as any).lastAutoTable;
-    console.log(`[PDF] Table metadata available:`, !!tableMetadata);
-    if (tableMetadata) {
-      console.log(`[PDF] Table info:`, {
-        startY: tableMetadata.startY,
-        finalY: tableMetadata.finalY,
-        pageNumber: tableMetadata.pageNumber,
-        columnCount: tableMetadata.columns?.length || 0,
-        rowCount: tableMetadata.rows?.length || 0,
-      });
-    }
-
-    // Get actual column positions from the table if available
-    const cols = tableMetadata?.columns || [];
-    const rows = tableMetadata?.rows || [];
-    
-    console.log(`[PDF DEBUG] Table has ${cols.length} columns, ${rows.length} rows`);
-    console.log(`[PDF DEBUG] Available metadata properties:`, Object.keys(tableMetadata || {}).join(', '));
-    
-    if (cols.length > 0) {
-      try {
-        const colInfo = cols
-          .map((c: any, i: number) => {
-            if (c.x !== undefined && c.width !== undefined) {
-              return `Col${i}: X=${c.x.toFixed(2)}, W=${c.width.toFixed(2)}`;
-            }
-            return `Col${i}: missing x or width`;
-          })
-          .join(' | ');
-        console.log(`[PDF] Column positions:`, colInfo);
-      } catch (e) {
-        console.warn(`[PDF] Could not format column info:`, e);
-      }
-    }
-
-    for (const sigInfo of signaturesNeeded) {
-      try {
-        console.log(`\n[PDF DEBUG] Processing signature for ${sigInfo.attendeeName}:`);
-        console.log(`  - rowIndex: ${sigInfo.rowIndex}`);
-        console.log(`  - signature data length: ${sigInfo.signatureData?.length || 0}`);
-        console.log(`  - signature data is valid PNG URL: ${sigInfo.signatureData?.startsWith('data:image/png') || false}`);
-        
-        // Get row Y position - prefer metadata, fallback to calculation
-        let rowY: number;
-        let rowHeight = 16; // match minCellHeight
-        
-        if (rows && rows.length > sigInfo.rowIndex && rows[sigInfo.rowIndex]) {
-          rowY = rows[sigInfo.rowIndex].y + (rowHeight / 2);
-          console.log(`  - Using metadata: row Y = ${rowY.toFixed(2)}`);
-        } else {
-          // Fallback: estimate based on table start and row heights
-          const startYValue = tableMetadata?.startY || tableStartY;
-          rowY = startYValue + 10 + (sigInfo.rowIndex * rowHeight) + (rowHeight / 2);
-          console.log(`  - Using fallback calculation: row Y = ${rowY.toFixed(2)}`);
-        }
-
-        // Get signature column position
-        let signatureColX = marginL;
-        let signatureColWidth = 30;
-        
-        if (cols && cols.length > 6 && cols[6] && cols[6].x !== undefined && cols[6].width !== undefined) {
-          signatureColX = cols[6].x;
-          signatureColWidth = cols[6].width;
-          console.log(`  - Using metadata column: X=${signatureColX.toFixed(2)}, W=${signatureColWidth.toFixed(2)}`);
-        } else {
-          console.log(`  - Using fallback column position`);
-        }
-        
-        const signatureImgSize = 12; // 12mm wide
-        const signatureImgHeight = 6; // 6mm tall
-        const imgX = signatureColX + (signatureColWidth - signatureImgSize) / 2;
-        
-        console.log(`  - Image position: X=${imgX.toFixed(2)}, Y=${rowY.toFixed(2)}, Size=${signatureImgSize}x${signatureImgHeight}mm`);
-        
-        // Validate signature data before adding
-        if (!sigInfo.signatureData || sigInfo.signatureData.length < 100) {
-          console.warn(`[PDF] ⚠ Signature data suspicious (length: ${sigInfo.signatureData?.length || 0})`);
-        }
-        
-        doc.addImage(
-          sigInfo.signatureData,
-          'PNG',
-          imgX,
-          rowY,
-          signatureImgSize,
-          signatureImgHeight
-        );
-        console.log(`[PDF] ✓ Signature added successfully for ${sigInfo.attendeeName}`);
-      } catch (err: any) {
-        console.error(`[PDF] ✗ FAILED to add signature for "${sigInfo.attendeeName}":`, err?.message || err);
-      }
-    }
-  } else {
-    console.log(`[PDF] ⚠ No signatures to add (length = 0)`);
-  }
+  // ── SIGNATURE IMAGES DRAWN DURING TABLE CREATION ──────────────────────────
+  // Signatures are now drawn directly in the table cells using the didDrawCell hook
+  // This ensures accurate positioning without trying to overlay after table rendering
+  console.log(`[PDF] Attendance table generated with signatures rendered in SIGNATURE column`);
 
   // ── FOOTER ────────────────────────────────────────────────────────────────
   const pageCount = (doc.internal as any).getNumberOfPages();

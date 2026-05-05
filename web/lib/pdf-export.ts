@@ -84,7 +84,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   // "TOLEDO CITY WATER DISTRICT" — left-aligned
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('  TOLEDO CITY WATER DISTRICT', textX, headerTop + 7, { align: 'left' });
+  doc.text('    TOLEDO CITY WATER DISTRICT', textX, headerTop + 7, { align: 'left' });
 
   // "A T T E N D A N C E" — left-aligned, same starting position
   doc.setFontSize(18);

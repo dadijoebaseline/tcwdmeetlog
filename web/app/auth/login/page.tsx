@@ -84,10 +84,7 @@ function LoginForm() {
           </p>
         </div>
 
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg text-sm text-gray-600">
-          <p className="font-semibold text-gray-900 mb-2">Note:</p>
-          <p>• New users are prompted to select a role after Google sign-in.</p>
-        </div>
+
       </Card>
     </div>
   );

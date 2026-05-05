@@ -26,7 +26,7 @@ export default function SignupPage() {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        router.push(`/auth/role-select?uid=${result.user.uid}`);
+        router.push(`/auth/role-select?uid=${result.user.uid}&forceRole=attendee`);
       } else {
         const userData = userDocSnap.data();
         if (userData.role === 'hr') {
@@ -73,10 +73,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg text-sm text-gray-600">
-          <p className="font-semibold text-gray-900 mb-2">After sign up:</p>
-          <p>• You&apos;ll be asked to select your role (HR Manager or Attendee)</p>
-        </div>
+
       </Card>
     </div>
   );

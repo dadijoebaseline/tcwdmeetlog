@@ -12,8 +12,9 @@ function RoleSelectForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const uid = searchParams.get('uid');
+  const forceRole = searchParams.get('forceRole');
 
-  const [role, setRole] = useState<'hr' | 'attendee'>('attendee');
+  const [role, setRole] = useState<'hr' | 'attendee'>(forceRole === 'attendee' ? 'attendee' : 'attendee');
   const [formData, setFormData] = useState({ 
     department: '', 
     position: '',
@@ -87,8 +88,8 @@ function RoleSelectForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Select Your Role</h1>
-          <p className="text-gray-600">Choose how you&apos;ll use this system</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{forceRole === 'attendee' ? 'Complete Your Profile' : 'Select Your Role'}</h1>
+          <p className="text-gray-600">{forceRole === 'attendee' ? 'Fill in your details to get started' : 'Choose how you\'ll use this system'}</p>
         </div>
 
         {error && (
@@ -98,43 +99,45 @@ function RoleSelectForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <label
-              className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
-              style={{ borderColor: role === 'hr' ? '#2563eb' : '#e5e7eb' }}
-            >
-              <input
-                type="radio"
-                name="role"
-                value="hr"
-                checked={role === 'hr'}
-                onChange={() => setRole('hr')}
-                className="w-4 h-4 cursor-pointer"
-              />
-              <div className="ml-4">
-                <p className="font-semibold text-gray-900">HR Manager</p>
-                <p className="text-sm text-gray-600">Manage meetings and track attendance</p>
-              </div>
-            </label>
+          {!forceRole && (
+            <div className="space-y-4">
+              <label
+                className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
+                style={{ borderColor: role === 'hr' ? '#2563eb' : '#e5e7eb' }}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value="hr"
+                  checked={role === 'hr'}
+                  onChange={() => setRole('hr')}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <div className="ml-4">
+                  <p className="font-semibold text-gray-900">HR Manager</p>
+                  <p className="text-sm text-gray-600">Manage meetings and track attendance</p>
+                </div>
+              </label>
 
-            <label
-              className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
-              style={{ borderColor: role === 'attendee' ? '#2563eb' : '#e5e7eb' }}
-            >
-              <input
-                type="radio"
-                name="role"
-                value="attendee"
-                checked={role === 'attendee'}
-                onChange={() => setRole('attendee')}
-                className="w-4 h-4 cursor-pointer"
-              />
-              <div className="ml-4">
-                <p className="font-semibold text-gray-900">Attendee</p>
-                <p className="text-sm text-gray-600">Check in to meetings using QR codes</p>
-              </div>
-            </label>
-          </div>
+              <label
+                className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition"
+                style={{ borderColor: role === 'attendee' ? '#2563eb' : '#e5e7eb' }}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value="attendee"
+                  checked={role === 'attendee'}
+                  onChange={() => setRole('attendee')}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <div className="ml-4">
+                  <p className="font-semibold text-gray-900">Attendee</p>
+                  <p className="text-sm text-gray-600">Check in to meetings using QR codes</p>
+                </div>
+              </label>
+            </div>
+          )}
 
           {role === 'attendee' && (
             <div className="space-y-6">

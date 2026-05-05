@@ -78,18 +78,18 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
     doc.addImage(logo.data, 'PNG', marginL, headerTop, logoW, logoTargetH);
   }
 
-  // Center text on full page width (independent of logo)
-  const pageCenter = pageW / 2;
+  // Align both text lines with same left margin (after logo)
+  const textX = marginL + logoW + 5;
 
-  // "TOLEDO CITY WATER DISTRICT" — centered on page
+  // "TOLEDO CITY WATER DISTRICT" — left-aligned
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('TOLEDO CITY WATER DISTRICT', pageCenter, headerTop + 7, { align: 'center' });
+  doc.text('TOLEDO CITY WATER DISTRICT', textX, headerTop + 7, { align: 'left' });
 
-  // "A T T E N D A N C E" — centered on page
+  // "A T T E N D A N C E" — left-aligned, same starting position
   doc.setFontSize(18);
   doc.setCharSpace(5);
-  doc.text('ATTENDANCE', pageCenter, headerTop + 16, { align: 'center' });
+  doc.text('ATTENDANCE', textX, headerTop + 16, { align: 'left' });
   doc.setCharSpace(0);
 
   // Divider

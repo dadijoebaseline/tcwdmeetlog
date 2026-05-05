@@ -282,21 +282,35 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
           if (att.checkedOut && profile?.digitalSignature) {
             try {
               const cell = hookData.cell;
-              const imgSize = 10; // 10mm wide
-              const imgHeight = 5; // 5mm tall
               
-              // Center image in cell
-              const imgX = cell.x + (cell.width - imgSize) / 2;
-              const imgY = cell.y + (cell.height - imgHeight) / 2;
+              // Make signature fill most of the cell with padding
+              const padding = 0.5; // 0.5mm padding on each side
+              const maxWidth = cell.width - (padding * 2);
+              const maxHeight = cell.height - (padding * 2);
               
-              console.log(`[PDF] Drawing signature in cell - X: ${imgX.toFixed(2)}, Y: ${imgY.toFixed(2)}, Size: ${imgSize}x${imgHeight}mm`);
+              // Signature aspect ratio is roughly 3:1 (wide and short)
+              // Adjust to fit cell while maintaining reasonable proportions
+              let imgWidth = maxWidth;
+              let imgHeight = maxWidth / 3; // Maintain signature aspect ratio
+              
+              // If height is too tall for cell, scale down
+              if (imgHeight > maxHeight) {
+                imgHeight = maxHeight;
+                imgWidth = imgHeight * 3;
+              }
+              
+              // Position at top-left of cell with padding
+              const imgX = cell.x + padding;
+              const imgY = cell.y + padding;
+              
+              console.log(`[PDF] Drawing signature - Cell: W=${cell.width.toFixed(2)}, H=${cell.height.toFixed(2)}, Image: ${imgWidth.toFixed(2)}x${imgHeight.toFixed(2)}mm`);
               
               doc.addImage(
                 profile.digitalSignature,
                 'PNG',
                 imgX,
                 imgY,
-                imgSize,
+                imgWidth,
                 imgHeight
               );
               console.log(`[PDF] ✓ Signature drawn for ${att.name}`);

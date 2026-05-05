@@ -73,25 +73,28 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   const logoTargetH = 20; // fixed rendered height in mm
   const logoW = logo ? (logo.w / logo.h) * logoTargetH : 0; // proportional width
   const headerTop = 10;
+  const logoGap = 4;
+  const totalHeaderW = logoW + logoGap + (contentW * 0.65); // logo + gap + text area
+  const headerStartX = marginL + (contentW - totalHeaderW) / 2; // center entire block
 
   if (logo) {
-    doc.addImage(logo.data, 'PNG', marginL, headerTop, logoW, logoTargetH);
+    doc.addImage(logo.data, 'PNG', headerStartX, headerTop, logoW, logoTargetH);
   }
 
-  // Text area starts after the logo (with a small gap) and ends at the right margin
-  const textAreaStart = marginL + logoW + 4;
-  const textAreaEnd = pageW - marginR;
+  // Text is centered in the space to the right of the logo within the centered block
+  const textAreaStart = headerStartX + logoW + logoGap;
+  const textAreaEnd = headerStartX + totalHeaderW;
   const textCenterX = textAreaStart + (textAreaEnd - textAreaStart) / 2;
 
-  // "TOLEDO CITY WATER DISTRICT" — centered in the text area (right of logo)
+  // "TOLEDO CITY WATER DISTRICT" — centered in the text area
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('TOLEDO CITY WATER DISTRICT', textCenterX, headerTop + 8, { align: 'center' });
+  doc.text('TOLEDO CITY WATER DISTRICT', textCenterX, headerTop + 7, { align: 'center' });
 
   // "A T T E N D A N C E" — centered in the same text area
   doc.setFontSize(18);
   doc.setCharSpace(5);
-  doc.text('ATTENDANCE', textCenterX, headerTop + 18, { align: 'center' });
+  doc.text('ATTENDANCE', textCenterX, headerTop + 16, { align: 'center' });
   doc.setCharSpace(0);
 
   // Divider

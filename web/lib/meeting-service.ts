@@ -26,6 +26,7 @@ export interface Meeting {
   time: string; // HH:MM format
   venue: string;
   description?: string;
+  resourceSpeaker?: string; // Resource speaker name
   createdBy: string; // User UID
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -40,6 +41,8 @@ export interface MeetingAttendee {
   email: string;
   checkedIn: boolean;
   checkInTime?: Timestamp;
+  checkedOut: boolean;
+  checkOutTime?: Timestamp;
 }
 
 /**
@@ -51,6 +54,7 @@ export async function createMeeting(meetingData: {
   time: string;
   venue: string;
   description?: string;
+  resourceSpeaker?: string;
   createdBy: string;
 }): Promise<string> {
   const now = Timestamp.now();
@@ -293,6 +297,34 @@ export async function recordAttendeeCheckIn(
         ...att,
         checkedIn: true,
         checkInTime: Timestamp.now(),
+      };
+    }
+    return att;
+  });
+
+  const meetingRef = doc(db, 'meetings', meetingId);
+  await updateDoc(meetingRef, {
+    attendees: updatedAttendees,
+    updatedAt: Timestamp.now(),
+  });
+}
+
+/**
+ * Record check-out for attendee
+ */
+export async function recordAttendeeCheckOut(
+  meetingId: string,
+  attendeeUid: string
+): Promise<void> {
+  const meeting = await getMeeting(meetingId);
+  if (!meeting) return;
+
+  const updatedAttendees = meeting.attendees.map((att) => {
+    if (att.uid === attendeeUid && att.checkedIn && !att.checkedOut) {
+      return {
+        ...att,
+        checkedOut: true,
+        checkOutTime: Timestamp.now(),
       };
     }
     return att;

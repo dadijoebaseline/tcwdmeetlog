@@ -21,6 +21,7 @@ export default function CreateMeetingPage() {
     time: string;
     venue: string;
     description?: string;
+    resourceSpeaker?: string;
   }) => {
     if (!user) {
       alert('You must be logged in to create a meeting');

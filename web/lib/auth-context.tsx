@@ -19,6 +19,7 @@ export interface UserProfile {
   department?: string;
   position?: string;
   photoURL?: string;
+  digitalSignature?: string; // User's digital signature (can be handwriting or initials)
   createdAt?: string;
   lastLoginAt?: string;
   isActive?: boolean;

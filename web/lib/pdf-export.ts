@@ -129,6 +129,14 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   doc.setFont('helvetica', 'normal');
   doc.text(data.time, marginL + 14, y);
 
+  if (data.description) {
+    y += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Description :', marginL, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.description, marginL + 22, y);
+  }
+
   y += 5;
   doc.setLineWidth(0.3);
   doc.setDrawColor(180, 180, 180);
@@ -150,7 +158,7 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
         '1',
         data.description || data.title,
         `${formatDate(data.date)}\n${data.time}`,
-        '',
+        data.resourceSpeaker || '',
       ],
     ],
     headStyles: {
@@ -188,13 +196,14 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
   const rows = sorted.map((att, i) => {
     const profile = userMap.get(att.uid);
     const inTime = att.checkedIn && att.checkInTime ? formatTime(att.checkInTime) : '';
+    const outTime = att.checkedOut && att.checkOutTime ? formatTime(att.checkOutTime) : '';
     return [
       String(i + 1),
       att.name || '',
       profile?.department || '',
       profile?.position || '',
       inTime,
-      '', // OUT — always blank
+      outTime, // OUT — now includes checkout time if available
       '', // SIGNATURE — always blank
     ];
   });

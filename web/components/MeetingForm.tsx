@@ -13,6 +13,7 @@ interface MeetingFormProps {
     time: string;
     venue: string;
     description?: string;
+    resourceSpeaker?: string;
   }) => Promise<void>;
   submitLabel?: string;
   isLoading?: boolean;
@@ -30,6 +31,7 @@ export function MeetingForm({
     time: initialData?.time || '',
     venue: initialData?.venue || '',
     description: initialData?.description || '',
+    resourceSpeaker: initialData?.resourceSpeaker || '',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export function MeetingForm({
           time: '',
           venue: '',
           description: '',
+          resourceSpeaker: '',
         });
       }
     } catch (err) {
@@ -140,6 +143,20 @@ export function MeetingForm({
             value={formData.venue}
             onChange={handleChange}
             placeholder="e.g., Conference Room A"
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Resource Speaker (optional)
+          </label>
+          <Input
+            type="text"
+            name="resourceSpeaker"
+            value={formData.resourceSpeaker}
+            onChange={handleChange}
+            placeholder="e.g., Dr. John Smith"
             disabled={isLoading}
           />
         </div>

@@ -13,7 +13,11 @@ function RoleSelectForm() {
   const uid = searchParams.get('uid');
 
   const [role, setRole] = useState<'hr' | 'attendee'>('attendee');
-  const [formData, setFormData] = useState({ department: '', position: '' });
+  const [formData, setFormData] = useState({ 
+    department: '', 
+    position: '',
+    digitalSignature: '',
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,6 +51,7 @@ function RoleSelectForm() {
       if (role === 'attendee') {
         userData.department = formData.department;
         userData.position = formData.position;
+        userData.digitalSignature = formData.digitalSignature;
       }
 
       await setDoc(doc(db, 'users', user.uid), userData);
@@ -129,6 +134,13 @@ function RoleSelectForm() {
                 placeholder="e.g., Technician"
                 value={formData.position}
                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                required
+              />
+              <Input
+                label="Digital Signature"
+                placeholder="Enter your signature or initials"
+                value={formData.digitalSignature}
+                onChange={(e) => setFormData({ ...formData, digitalSignature: e.target.value })}
                 required
               />
             </div>

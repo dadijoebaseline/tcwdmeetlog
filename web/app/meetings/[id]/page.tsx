@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { ProtectedRoute } from '@/lib/route-guard';
-import { getMeeting, Meeting, recordAttendeeCheckIn } from '@/lib/meeting-service';
+import { getMeeting, Meeting, recordAttendeeCheckIn, recordAttendeeCheckOut } from '@/lib/meeting-service';
 import { Card } from '@/components/FormElements';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { QRScanner } from '@/components/QRScanner';
@@ -19,6 +19,7 @@ export default function AttendeeMeetingDetailPage() {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
+  const [scanMode, setScanMode] = useState<'check-in' | 'check-out'>('check-in');
   const [checkInStatus, setCheckInStatus] = useState<'idle' | 'success' | 'error' | 'wrong-meeting'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -52,7 +53,13 @@ export default function AttendeeMeetingDetailPage() {
       }
 
       if (!user) return;
-      await recordAttendeeCheckIn(meetingId, user.uid);
+
+      if (scanMode === 'check-in') {
+        await recordAttendeeCheckIn(meetingId, user.uid);
+      } else {
+        await recordAttendeeCheckOut(meetingId, user.uid);
+      }
+
       const updated = await getMeeting(meetingId);
       if (updated) setMeeting(updated);
       setCheckInStatus('success');
@@ -134,7 +141,7 @@ export default function AttendeeMeetingDetailPage() {
           {/* Check-in card */}
           <Card>
             <div className="text-center">
-              {alreadyCheckedIn ? (
+              {alreadyCheckedIn && !myRecord?.checkedOut ? (
                 <>
                   <div className="text-6xl mb-4">✅</div>
                   <h2 className="text-2xl font-bold text-green-700 mb-1">You're Checked In!</h2>
@@ -142,6 +149,30 @@ export default function AttendeeMeetingDetailPage() {
                     Checked in at{' '}
                     {myRecord?.checkInTime
                       ? new Date(myRecord.checkInTime.toMillis()).toLocaleString()
+                      : '—'}
+                  </p>
+                  <p className="text-gray-600 text-sm mt-4 mb-6">Ready to check out? Scan the QR code again.</p>
+                  <button
+                    onClick={() => { setScanMode('check-out'); setCheckInStatus('idle'); setShowScanner(true); }}
+                    className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-lg transition shadow-md shadow-orange-200"
+                  >
+                    📤 Scan to Check Out
+                  </button>
+                </>
+              ) : myRecord?.checkedOut ? (
+                <>
+                  <div className="text-6xl mb-4">✅</div>
+                  <h2 className="text-2xl font-bold text-green-700 mb-1">You've Checked Out!</h2>
+                  <p className="text-gray-500 text-sm">
+                    Checked in at{' '}
+                    {myRecord?.checkInTime
+                      ? new Date(myRecord.checkInTime.toMillis()).toLocaleString()
+                      : '—'}
+                  </p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Checked out at{' '}
+                    {myRecord?.checkOutTime
+                      ? new Date(myRecord.checkOutTime.toMillis()).toLocaleString()
                       : '—'}
                   </p>
                 </>
@@ -155,7 +186,7 @@ export default function AttendeeMeetingDetailPage() {
 
                   {checkInStatus === 'success' && (
                     <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                      ✓ Check-in recorded successfully!
+                      ✓ {scanMode === 'check-in' ? 'Check-in' : 'Check-out'} recorded successfully!
                     </div>
                   )}
                   {(checkInStatus === 'error' || checkInStatus === 'wrong-meeting') && (
@@ -165,7 +196,7 @@ export default function AttendeeMeetingDetailPage() {
                   )}
 
                   <button
-                    onClick={() => { setCheckInStatus('idle'); setShowScanner(true); }}
+                    onClick={() => { setScanMode('check-in'); setCheckInStatus('idle'); setShowScanner(true); }}
                     className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-lg transition shadow-md shadow-blue-200"
                   >
                     📷 Open Camera & Scan QR Code

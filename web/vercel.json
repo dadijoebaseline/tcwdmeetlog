@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "devCommand": "npm run dev"
+  "devCommand": "npm run dev",
+  "ignoreCommand": "exit 1"
 }

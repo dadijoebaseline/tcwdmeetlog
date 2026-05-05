@@ -201,12 +201,12 @@ export default function MeetingDetailPage() {
           </div>
 
           <div className="mb-6">
-            <div className="flex gap-4 border-b border-gray-200">
+            <div className="flex gap-2 sm:gap-4 border-b border-gray-200 overflow-x-auto">
               {(['info', 'attendees', 'attendance'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 font-medium border-b-2 transition ${
+                  className={`px-3 sm:px-4 py-2 font-medium text-sm sm:text-base border-b-2 transition whitespace-nowrap ${
                     activeTab === tab
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -260,8 +260,8 @@ export default function MeetingDetailPage() {
                 </div>
               )}
 
-              <div className="pt-8 border-t border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">
+              <div className="pt-6 sm:pt-8 border-t border-gray-200">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">
                   QR Codes for Check-in & Check-out
                 </h3>
                 <QRCodeDisplay meetingId={meeting.id} meetingTitle={meeting.title} showBoth={true} />

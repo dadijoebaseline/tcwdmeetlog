@@ -115,17 +115,17 @@ export default function AttendeeMeetingDetailPage() {
   return (
     <ProtectedRoute requiredRole="attendee">
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-xl mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
           {/* Back */}
-          <Link href="/meetings" className="text-sm text-blue-600 hover:underline mb-6 inline-block">
+          <Link href="/meetings" className="text-xs sm:text-sm text-blue-600 hover:underline mb-4 sm:mb-6 inline-block">
             ← Back to My Meetings
           </Link>
 
           {/* Header */}
             <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">{meeting.title}</h1>
-            <p className="text-gray-700 mt-1">{meeting.venue}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{meeting.title}</h1>
+            <p className="text-sm sm:text-base text-gray-700 mt-1">{meeting.venue}</p>
           </div>
 
           {/* Meeting info card */}

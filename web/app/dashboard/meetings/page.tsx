@@ -84,29 +84,29 @@ export default function MeetingsListPage() {
     <ProtectedRoute requiredRole="hr">
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Meetings</h1>
-              <p className="text-gray-600">Manage your meetings and track attendance</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1">Meetings</h1>
+              <p className="text-sm sm:text-base text-gray-600">Manage your meetings and track attendance</p>
             </div>
-            <Link href="/dashboard/meetings/create">
-              <Button variant="primary">➕ Create Meeting</Button>
+            <Link href="/dashboard/meetings/create" className="w-full sm:w-auto">
+              <Button variant="primary" className="w-full sm:w-auto">➕ Create Meeting</Button>
             </Link>
           </div>
 
           <Card className="mb-6">
-            <div className="space-y-4">
-              <div className="flex gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex gap-2 sm:gap-4">
                 <input
                   type="text"
                   placeholder="Search meetings by title or venue..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                 <select
                   value={statusFilter}
                   onChange={(e) =>

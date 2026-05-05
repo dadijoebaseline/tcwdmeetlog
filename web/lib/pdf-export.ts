@@ -283,23 +283,12 @@ export async function exportAttendancePDF(data: MeetingExportData): Promise<void
             try {
               const cell = hookData.cell;
               
-              // Make signature fill most of the cell with padding
-              const padding = 0.5; // 0.5mm padding on each side
-              const maxWidth = cell.width - (padding * 2);
-              const maxHeight = cell.height - (padding * 2);
+              // Fill the entire cell with minimal padding
+              const padding = 0.3; // 0.3mm padding
+              const imgWidth = cell.width - (padding * 2);
+              const imgHeight = cell.height - (padding * 2);
               
-              // Signature aspect ratio is roughly 3:1 (wide and short)
-              // Adjust to fit cell while maintaining reasonable proportions
-              let imgWidth = maxWidth;
-              let imgHeight = maxWidth / 3; // Maintain signature aspect ratio
-              
-              // If height is too tall for cell, scale down
-              if (imgHeight > maxHeight) {
-                imgHeight = maxHeight;
-                imgWidth = imgHeight * 3;
-              }
-              
-              // Position at top-left of cell with padding
+              // Position at top-left with padding
               const imgX = cell.x + padding;
               const imgY = cell.y + padding;
               

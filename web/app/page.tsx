@@ -20,14 +20,23 @@ export default function Home() {
   }, [user, role, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: "url('/IMG_3219.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      <div className="min-h-screen bg-black/50">
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
             TCWD Attendance Management
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-200 mb-8">
             Modern attendance tracking system for Toledo City Water District
           </p>
 
@@ -46,8 +55,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="text-gray-600">
-              <p>Welcome, {user.email}</p>
-              <p className="text-sm mt-2">Redirecting to dashboard...</p>
+              <p className="text-white">Welcome, {user.email}</p>
+              <p className="text-sm mt-2 text-gray-200">Redirecting to dashboard...</p>
             </div>
           )}
         </div>
@@ -156,6 +165,7 @@ export default function Home() {
         </Card>
 
 
+      </div>
       </div>
     </div>
   );

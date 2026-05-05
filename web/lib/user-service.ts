@@ -5,12 +5,11 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
   QueryConstraint,
-  orderBy,
-  limit,
 } from 'firebase/firestore';
 
 /**
@@ -49,15 +48,14 @@ export async function updateUserProfile(
 /**
  * Get all users (HR only)
  */
-export async function getAllUsers(constraints: QueryConstraint[] = []): Promise<UserProfile[]> {
+export async function getAllUsers(): Promise<UserProfile[]> {
   try {
-    const q = query(
-      collection(db, 'users'),
-      orderBy('createdAt', 'desc'),
-      ...constraints
-    );
+    const q = query(collection(db, 'users'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => doc.data() as UserProfile);
+    const users = querySnapshot.docs.map((doc) => doc.data() as UserProfile);
+    return users.sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '')
+    );
   } catch (error) {
     console.error('Error fetching users:', error);
     throw error;
@@ -90,13 +88,10 @@ export async function searchUsers(searchTerm: string): Promise<UserProfile[]> {
  */
 export async function getUsersByRole(role: string): Promise<UserProfile[]> {
   try {
-    const q = query(
-      collection(db, 'users'),
-      where('role', '==', role),
-      orderBy('createdAt', 'desc')
-    );
+    const q = query(collection(db, 'users'), where('role', '==', role));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => doc.data() as UserProfile);
+    const users = querySnapshot.docs.map((doc) => doc.data() as UserProfile);
+    return users.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   } catch (error) {
     console.error('Error fetching users by role:', error);
     throw error;
@@ -155,6 +150,18 @@ export async function deactivateUser(uid: string): Promise<void> {
     });
   } catch (error) {
     console.error('Error deactivating user:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete user document from Firestore
+ */
+export async function deleteUserProfile(uid: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'users', uid));
+  } catch (error) {
+    console.error('Error deleting user:', error);
     throw error;
   }
 }

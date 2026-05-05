@@ -20,6 +20,7 @@ import { QRCodeDisplay } from '@/components/QRCodeDisplay';
 import { Card } from '@/components/FormElements';
 import { Button } from '@/components/Button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { exportAttendancePDF } from '@/lib/pdf-export';
 import Link from 'next/link';
 
 export default function MeetingDetailPage() {
@@ -39,6 +40,7 @@ export default function MeetingDetailPage() {
   > | null>(null);
   const [showAddAttendee, setShowAddAttendee] = useState(false);
   const [selectedAttendee, setSelectedAttendee] = useState<string>('');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const loadMeetingData = async () => {
@@ -149,6 +151,25 @@ export default function MeetingDetailPage() {
     (u) => !meeting.attendees.find((att) => att.uid === u.uid)
   );
 
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      await exportAttendancePDF({
+        title: meeting.title,
+        venue: meeting.venue,
+        date: meeting.date,
+        time: meeting.time,
+        description: meeting.description,
+        attendees: meeting.attendees,
+        allUsers: availableUsers,
+      });
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <ProtectedRoute requiredRole="hr">
       <div className="min-h-screen bg-gray-50">
@@ -158,7 +179,14 @@ export default function MeetingDetailPage() {
               <h1 className="text-4xl font-bold text-gray-900">{meeting.title}</h1>
               <p className="text-gray-600 mt-2">{meeting.venue}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant="primary"
+                onClick={handleExportPDF}
+                disabled={exporting}
+              >
+                {exporting ? '⏳ Exporting…' : '📄 Export PDF'}
+              </Button>
               <Link href={`/dashboard/meetings/${meeting.id}/edit`}>
                 <Button variant="secondary">✏️ Edit</Button>
               </Link>
